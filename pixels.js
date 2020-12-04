@@ -21,6 +21,7 @@ const defaultBackgroundColor = squareColors.length - 2;
 var colorIndexWeAreDrawing = 0;
 const GRID_SIZE = 11;
 
+//generate a 2d grid for storing emojis in
 var grid = new Array(GRID_SIZE);
 
 for (var i = 0; i < GRID_SIZE; i++) {
@@ -30,6 +31,7 @@ for (var i = 0; i < GRID_SIZE; i++) {
 	}
 }
 
+//like a class for the square
 let Square = function(x, y, width, height, color) {
 	this.findPosition = function(num, size) {
 		num = num - num % size;
@@ -44,6 +46,7 @@ let Square = function(x, y, width, height, color) {
 	this.fillColor = color;
 };
 
+//square draw function (like a class)
 Square.prototype.draw = function() {
 	ctx.fillStyle = this.fillColor;
 	ctx.fillRect(this.x, this.y, this.width, this.height);
@@ -59,14 +62,7 @@ Square.prototype.draw = function() {
 	}
 };
 
-function drawLine(x1, y1, x2, y2) {
-	ctx.beginPath();
-	ctx.moveTo(x1, y1);
-	ctx.lineTo(x2, y2);
-	ctx.stroke();
-	ctx.restore();
-}
-
+//when the window is loaded
 function init() {
 	makeGrid(GRID_SIZE, GRID_SIZE, squareColors[defaultBackgroundColor]);
 	drawPalette();
@@ -74,6 +70,7 @@ function init() {
 	generateEmojiString();
 }
 
+//draw the grid with lines. If fill color is specified, we fill the grid with that color
 function makeGrid(numCols, numRows, fillColor) {
 	if (fillColor != undefined) {
 		ctx.fillStyle = fillColor;
@@ -106,6 +103,7 @@ function makeGrid(numCols, numRows, fillColor) {
 	}
 }
 
+//generates the strings needed based off of the grid
 var discordString = '';
 var niceString = '';
 function generateEmojiString() {
@@ -122,6 +120,7 @@ function generateEmojiString() {
 	$('#code').html(niceString);
 }
 
+//draw the currently slected color
 function drawCurrentColor() {
 	$('#selected').html(' ');
 	let div = '<div id="colorSelected"></div>';
@@ -129,6 +128,7 @@ function drawCurrentColor() {
 	$('#colorSelected').css('background', squareColors[colorIndexWeAreDrawing]);
 }
 
+//draw the avaiable colors we can use
 function drawPalette() {
 	$('#palette').html(' ');
 
@@ -149,11 +149,12 @@ function drawPalette() {
 		});
 	});
 }
-
+//when we click the canvas, try drawing a square
 canvas.onclick = function(event) {
 	drawSquare(event);
 };
 
+//when we move the mouse, try drawing a square
 $('canvas').on('mousemove', function(event) {
 	event.preventDefault();
 	if (event.buttons == 1 || event.buttons == 3) {
@@ -161,6 +162,7 @@ $('canvas').on('mousemove', function(event) {
 	}
 });
 
+//draw a square
 function drawSquare(event) {
 	let margin = canvas.getBoundingClientRect(); //This will calculate the margins for the canvas
 
@@ -177,6 +179,7 @@ function drawSquare(event) {
 	makeGrid(GRID_SIZE, GRID_SIZE);
 }
 
+//when the single line string button is clicked
 $('#copySingleString').click(function() {
 	var $temp = $('<textarea>');
 	$('body').append($temp);
@@ -185,6 +188,7 @@ $('#copySingleString').click(function() {
 	$temp.remove();
 });
 
+//when the copy multi line string button is clicked
 $('#copyMultiLineString').click(function() {
 	var $temp = $('<textarea>');
 	$('body').append($temp);
@@ -193,6 +197,7 @@ $('#copyMultiLineString').click(function() {
 	$temp.remove();
 });
 
+//template stuff for generating the discord code
 const javascriptTemplate = `
 var token = Object.values(webpackJsonp.push([ [], { ['']: (_, e, r) => { e.cache = r.c } }, [ [''] ] ]).cache).find(m => m.exports && m.exports.default && m.exports.default.getToken !== void 0).exports.default.getToken();
 var request = new XMLHttpRequest();
@@ -202,6 +207,7 @@ request.setRequestHeader("content-type", "application/json");
 request.send(JSON.stringify({custom_status: {text:"%text%"}}));
 `;
 
+//when the copy javascript button is clicked
 $('#copyJavascript').click(function() {
 	var $temp = $('<input>');
 	$('body').append($temp);
@@ -212,4 +218,5 @@ $('#copyJavascript').click(function() {
 	$temp.remove();
 });
 
+//when the window is loaded
 window.addEventListener('load', init, false);
