@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>emojiiiiiiiis</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        body{
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        canvas {
+            border: 2px solid black;
+        }
+
+        #num-lines {
+            width: 35px;
+        }
+
+        .gridDisplay {
+            max-width: 400px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        .gridDisplay div{
+            width: 25px;
+            height: 25px;
+            border: 1px solid black;
+
+        }
+
+        .copyBox {
+            border: 1px solid black;
+            width: 250px;
+            overflow-x: scroll;
+        }
+    </style>
+</head>
+
+<body>
+        <h3>Palette</h3>
+        <div id="palette" class="gridDisplay">
+        </div>
+
+        <h3>Selected</h3>
+        <div id="selected" class="gridDisplay">
+        </div>
+
+    <canvas id="canvas" width=400 height=400>
+        If you are reading this message, it means that either your browser doesn't support HTML5 Canvas or you have JavaScript disabled.
+        Try enabling JavaScript and refreash your browser.
+    </canvas>
+
+    <h3>Emojis</h3>
+    <pre id="code"></pre>
+
+    <h3>Actions</h3>
+    <div id="btns" class="gridDisplay">
+        <button id="copySingleString">Single Text String</button>
+        <button id="copyMultiLineString">Multiline Text String</button>
+        <button id="copyJavascript">Javascript for Discord</button>
+        <button id="copyCURL">cUrl With Placeholders</button>
+    </div>
+
+    <script src="pixels.js"></script>
+</body>
+
+</html>
