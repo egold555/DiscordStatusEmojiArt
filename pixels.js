@@ -1,6 +1,10 @@
+//I need to comment this shit
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+//Black and white seemingly have different character widths then the rest of the colored squares.
+//Testing still needs to be done.
 const squareColors = [
 	'#8E562E',
 	'#E81224',
@@ -8,11 +12,11 @@ const squareColors = [
 	'#FFF100',
 	'#16C60C',
 	'#0078D7',
-	'#886CE4',
-	'#383838',
-	'#F2F2F2'
+	'#886CE4'
+	// '#383838',
+	// '#F2F2F2'
 ];
-const squareEmojis = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '⬛', '⬜' ];
+const squareEmojis = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪' /*'⬛', '⬜' */ ];
 const defaultBackgroundColor = squareColors.length - 2;
 var colorIndexWeAreDrawing = 0;
 const GRID_SIZE = 11;
@@ -42,7 +46,6 @@ let Square = function(x, y, width, height, color) {
 
 Square.prototype.draw = function() {
 	ctx.fillStyle = this.fillColor;
-	//ctx.strokeStyle = 'black';
 	ctx.fillRect(this.x, this.y, this.width, this.height);
 
 	var col = Math.round(this.x / this.width);
@@ -123,7 +126,7 @@ function drawCurrentColor() {
 	$('#selected').html(' ');
 	let div = '<div id="colorSelected"></div>';
 	$('#selected').append(div);
-	$('#colorSelected').css('background', squareColors[colorIndexWeAreDrawing]); //"white" in case squareColors[i] is undefined
+	$('#colorSelected').css('background', squareColors[colorIndexWeAreDrawing]);
 }
 
 function drawPalette() {
