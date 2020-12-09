@@ -9,4 +9,4 @@ Set an 11x11 grid of emojis as your Discord status
 2) Draw some art
 3) Click the `Javascript for Discord` button.
 4) Go to Discords console
-5) Paste the code in, and oress enter
+5) Paste the code in, and press enter
