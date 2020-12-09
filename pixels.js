@@ -5,9 +5,9 @@ const ctx = canvas.getContext('2d');
 
 //Black and white seemingly have different character widths then the rest of the colored squares.
 //Testing still needs to be done.
-const squareColors = [ '#8E562E', '#E81224', '#F7630C', '#FFF100', '#16C60C', '#0078D7', '#886CE4', '#F2F2F2' ];
-const squareEmojis = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '⬜' ];
-const defaultBackgroundColor = squareColors.length - 1;
+const squareColors = [ '#8E562E', '#E81224', '#F7630C', '#FFF100', '#16C60C', '#0078D7', '#886CE4' ];
+const squareEmojis = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪' ];
+const defaultBackgroundColor = squareColors.length - 2;
 var colorIndexWeAreDrawing = 0;
 const GRID_SIZE = 11;
 
