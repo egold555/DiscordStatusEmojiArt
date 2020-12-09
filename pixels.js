@@ -63,7 +63,7 @@ function updateCanvasGrid() {
 		drawLine(0, xCord, canvasSize, xCord);
 	}
 
-	updateEmojiGrid();
+	//updateEmojiGrid();
 
 	function drawLine(x1, y1, x2, y2) {
 		ctx.beginPath();
@@ -90,7 +90,6 @@ function updateUrl() {
 	var str = JSON.stringify(obj);
 	str = btoa(str);
 	window.location.hash = str;
-	console.log('Updating hash: ' + str);
 }
 
 function decodeOnFirstLoad() {
@@ -113,7 +112,7 @@ function decodeOnFirstLoad() {
 										var rawData = data[i][j];
 										if (Number.isInteger(rawData)) {
 											if (!(rawData >= 0 && rawData < MAX_COLORS)) {
-												console.error(
+												error(
 													'Failed to decode hash. Data object at ' +
 														i +
 														'-' +
@@ -127,7 +126,7 @@ function decodeOnFirstLoad() {
 												return;
 											}
 										} else {
-											console.error(
+											error(
 												'Failed to decode hash. Data object at ' +
 													i +
 													'-' +
@@ -138,7 +137,7 @@ function decodeOnFirstLoad() {
 										}
 									}
 								} else {
-									console.error(
+									error(
 										'Failed to decode hash. Data field inner array ' +
 											i +
 											" isn't the correct size!"
@@ -146,33 +145,38 @@ function decodeOnFirstLoad() {
 									return;
 								}
 							} else {
-								console.error(
-									'Failed to decode hash. Data field inner array ' + i + " isn't an array!"
-								);
+								error('Failed to decode hash. Data field inner array ' + i + " isn't an array!");
 								return;
 							}
 						}
 					} else {
-						console.error("Failed to decode hash. Data array isn't the correct size!");
+						error("Failed to decode hash. Data array isn't the correct size!");
 						return;
 					}
 				} else {
-					console.error("Failed to decode hash. Data field isn't an array!");
+					error("Failed to decode hash. Data field isn't an array!");
 					return;
 				}
 
 				//the data is right for version 1
 				grid = data;
 				updateCanvasGrid();
+				tata.success('Success!', 'Successfull loaded from the shared URL!');
 			} else {
-				console.error('Failed to decode hash. Unknown version!');
+				error('Failed to decode hash. Unknown version!');
 				return;
 			}
 		} catch (err) {
-			console.error('Please stop messing with the hash string!', err);
+			tata.error();
+			error('Please stop messing with the hash string!', err);
 			return;
 		}
 	}
+}
+
+function error(msg, err) {
+	tata.error('An error occurred.', msg);
+	console.error(msg, err);
 }
 
 function getEmojiString(newlines = false) {
@@ -258,20 +262,14 @@ function mouseDrawOnCanvas(event) {
 
 //when the single line string button is clicked
 $('#copySingleString').click(function() {
-	var $temp = $('<textarea>');
-	$('body').append($temp);
-	$temp.val(getEmojiString()).select();
-	document.execCommand('copy');
-	$temp.remove();
+	copyStringToClipboard(getEmojiString());
+	tata.success('Copied!', 'Copied the emoji string to your clipboard.');
 });
 
 //when the copy multi line string button is clicked
 $('#copyMultiLineString').click(function() {
-	var $temp = $('<textarea>');
-	$('body').append($temp);
-	$temp.val(getEmojiString(true)).select();
-	document.execCommand('copy');
-	$temp.remove();
+	copyStringToClipboard(getEmojiString(true));
+	tata.success('Copied!', 'Copied the multi-lined emoji string to your clipboard.');
 });
 
 //template stuff for generating the discord code
@@ -286,14 +284,24 @@ request.send(JSON.stringify({custom_status: {text:"%text%"}}));
 
 //when the copy javascript button is clicked
 $('#copyJavascript').click(function() {
-	var $temp = $('<input>');
-	$('body').append($temp);
 	var str = javascriptTemplate;
 	str = str.replace('%text%', getEmojiString());
+	copyStringToClipboard(str);
+	tata.success('Copied!', 'Copied the javascript for Discord to your clipboard.');
+});
+
+$('#copyShareUrl').click(function() {
+	copyStringToClipboard(window.location.href);
+	tata.success('Copied!', 'Copied the shared url to your clipboard.');
+});
+
+function copyStringToClipboard(str) {
+	var $temp = $('<textarea>');
+	$('body').append($temp);
 	$temp.val(str).select();
 	document.execCommand('copy');
 	$temp.remove();
-});
+}
 
 //when the window is loaded
 window.addEventListener('load', init, false);
