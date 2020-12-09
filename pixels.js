@@ -11,10 +11,11 @@ const SQUARE_COLORS_ARRAY = [ '#8E562E', '#E81224', '#F7630C', '#FFF100', '#16C6
 const SQUARE_EMOJIS_ARRAY = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪' ];
 const DEFAULT_BG_COLOR = SQUARE_COLORS_ARRAY.length - 1;
 var colorIndexWeAreDrawing = 0;
-
+const MAX_COLORS = SQUARE_COLORS_ARRAY.length;
 const GRID_SIZE = 11;
 const CANVAS_SQUARE_SIZE = 36; //px
 const CANVAS_GRID_LINE_WIDTH = 1;
+const CURRENT_VERSION = 1;
 
 //generate a 2d grid for storing emojis in
 var grid = new Array(GRID_SIZE);
@@ -25,6 +26,7 @@ function init() {
 	updateCanvasGrid();
 	drawPalette();
 	drawCurrentColor();
+	decodeOnFirstLoad();
 }
 
 function initalizeGrid() {
@@ -82,14 +84,95 @@ function updateEmojiGrid() {
 }
 
 function updateUrl() {
-	// var url = '?data=';
-	// var obj = new Object();
-	// obj.version = 1;
-	// obj.data = grid;
-	// var str = JSON.stringify(obj);
-	// str = btoa(str);
-	// window.location.hash = str;
-	// console.log('Updating hash: ' + str);
+	var obj = new Object();
+	obj.version = CURRENT_VERSION;
+	obj.data = grid;
+	var str = JSON.stringify(obj);
+	str = btoa(str);
+	window.location.hash = str;
+	console.log('Updating hash: ' + str);
+}
+
+function decodeOnFirstLoad() {
+	var hash = window.location.hash;
+	hash = hash.substring(1);
+	if (hash) {
+		try {
+			var decoded = atob(hash);
+			var obj = JSON.parse(decoded);
+
+			if (obj.version == 1) {
+				var data = obj.data;
+				if (Array.isArray(data)) {
+					if (data.length == GRID_SIZE) {
+						for (var i = 0; i < GRID_SIZE; i++) {
+							var innerArray = data[i];
+							if (Array.isArray(innerArray)) {
+								if (innerArray.length == GRID_SIZE) {
+									for (var j = 0; j < GRID_SIZE; j++) {
+										var rawData = data[i][j];
+										if (Number.isInteger(rawData)) {
+											if (!(rawData >= 0 && rawData < MAX_COLORS)) {
+												console.error(
+													'Failed to decode hash. Data object at ' +
+														i +
+														'-' +
+														j +
+														" isn't between 0 and " +
+														MAX_COLORS +
+														'. It is ' +
+														rawData +
+														'.'
+												);
+												return;
+											}
+										} else {
+											console.error(
+												'Failed to decode hash. Data object at ' +
+													i +
+													'-' +
+													j +
+													" isn't a integer"
+											);
+											return;
+										}
+									}
+								} else {
+									console.error(
+										'Failed to decode hash. Data field inner array ' +
+											i +
+											" isn't the correct size!"
+									);
+									return;
+								}
+							} else {
+								console.error(
+									'Failed to decode hash. Data field inner array ' + i + " isn't an array!"
+								);
+								return;
+							}
+						}
+					} else {
+						console.error("Failed to decode hash. Data array isn't the correct size!");
+						return;
+					}
+				} else {
+					console.error("Failed to decode hash. Data field isn't an array!");
+					return;
+				}
+
+				//the data is right for version 1
+				grid = data;
+				updateCanvasGrid();
+			} else {
+				console.error('Failed to decode hash. Unknown version!');
+				return;
+			}
+		} catch (err) {
+			console.error('Please stop messing with the hash string!', err);
+			return;
+		}
+	}
 }
 
 function getEmojiString(newlines = false) {
