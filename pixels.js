@@ -1,113 +1,109 @@
 //I need to comment this shit
 
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
 
 //Black and white seemingly have different character widths then the rest of the colored squares.
 //Testing still needs to be done.
-const squareColors = [ '#8E562E', '#E81224', '#F7630C', '#FFF100', '#16C60C', '#0078D7', '#886CE4' ];
-const squareEmojis = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪' ];
-const defaultBackgroundColor = squareColors.length - 2;
+//const squareColors = [ '#8E562E', '#E81224', '#F7630C', '#FFF100', '#16C60C', '#0078D7', '#886CE4', '#F2F2F2' ];
+//const squareEmojis = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '⬜' ];
+
+const SQUARE_COLORS_ARRAY = [ '#8E562E', '#E81224', '#F7630C', '#FFF100', '#16C60C', '#0078D7', '#886CE4' ];
+const SQUARE_EMOJIS_ARRAY = [ '🟫', '🟥', '🟧', '🟨', '🟩', '🟦', '🟪' ];
+const DEFAULT_BG_COLOR = SQUARE_COLORS_ARRAY.length - 1;
 var colorIndexWeAreDrawing = 0;
+
 const GRID_SIZE = 11;
+const CANVAS_SQUARE_SIZE = 36; //px
+const CANVAS_GRID_LINE_WIDTH = 1;
 
 //generate a 2d grid for storing emojis in
 var grid = new Array(GRID_SIZE);
 
-for (var i = 0; i < GRID_SIZE; i++) {
-	grid[i] = new Array(GRID_SIZE);
-	for (var j = 0; j < GRID_SIZE; j++) {
-		grid[i][j] = squareEmojis[defaultBackgroundColor];
-	}
-}
-
-//like a class for the square
-let Square = function(x, y, width, height, color) {
-	this.findPosition = function(num, size) {
-		num = num - num % size;
-		return num === 0 ? num : num + 1;
-	};
-
-	this.x = this.findPosition(x, width);
-	this.y = this.findPosition(y, height);
-	this.width = width;
-	this.height = height;
-
-	this.fillColor = color;
-};
-
-//square draw function (like a class)
-Square.prototype.draw = function() {
-	ctx.fillStyle = this.fillColor;
-	ctx.fillRect(this.x, this.y, this.width, this.height);
-
-	var col = Math.round(this.x / this.width);
-	var row = Math.round(this.y / this.height);
-
-	if (row >= 0 && col >= 0 && row < GRID_SIZE && col < GRID_SIZE) {
-		console.log(this.x, this.y, this.width, this.height, row, col);
-		let emoji = squareEmojis[colorIndexWeAreDrawing];
-		grid[row][col] = emoji;
-		generateEmojiString();
-	}
-};
-
 //when the window is loaded
 function init() {
-	makeGrid(GRID_SIZE, GRID_SIZE, squareColors[defaultBackgroundColor]);
+	initalizeGrid();
+	updateCanvasGrid();
 	drawPalette();
 	drawCurrentColor();
-	generateEmojiString();
 }
 
-//draw the grid with lines. If fill color is specified, we fill the grid with that color
-function makeGrid(numCols, numRows, fillColor) {
-	if (fillColor != undefined) {
-		ctx.fillStyle = fillColor;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
+function initalizeGrid() {
+	for (var i = 0; i < GRID_SIZE; i++) {
+		grid[i] = new Array(GRID_SIZE);
+		for (var j = 0; j < GRID_SIZE; j++) {
+			grid[i][j] = DEFAULT_BG_COLOR;
+		}
+	}
+}
+
+function updateCanvasGrid() {
+	const ctx = canvas.getContext('2d');
+	//ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	var canvasSize = GRID_SIZE * (CANVAS_SQUARE_SIZE + CANVAS_GRID_LINE_WIDTH) + CANVAS_GRID_LINE_WIDTH;
+
+	for (var i = 0; i < GRID_SIZE; i++) {
+		for (var j = 0; j < GRID_SIZE; j++) {
+			let colorIndex = grid[i][j];
+			let color = SQUARE_COLORS_ARRAY[colorIndex];
+			let xCord = j * (CANVAS_SQUARE_SIZE + CANVAS_GRID_LINE_WIDTH) + CANVAS_GRID_LINE_WIDTH;
+			let yCord = i * (CANVAS_SQUARE_SIZE + CANVAS_GRID_LINE_WIDTH) + CANVAS_GRID_LINE_WIDTH;
+			fillSquare(xCord, yCord, CANVAS_SQUARE_SIZE, CANVAS_SQUARE_SIZE, color);
+		}
 	}
 
 	ctx.strokeStyle = 'black';
+	ctx.lineWidth = 1;
 
-	let canvasWidth = canvas.width,
-		canvasHeight = canvas.height,
-		width = canvas.width / numCols,
-		height = canvas.height / numRows;
-
-	//Horizonal lines
-	for (let i = width; i < canvas.width; i += width) {
-		drawLine(i, 0, i, canvasHeight);
+	for (let i = 0; i < GRID_SIZE + 1; i++) {
+		let xCord = i * (CANVAS_SQUARE_SIZE + CANVAS_GRID_LINE_WIDTH);
+		drawLine(xCord, 0, xCord, canvasSize);
+		drawLine(0, xCord, canvasSize, xCord);
 	}
 
-	//Vertical lines
-	for (let i = height; i < canvasHeight; i += height) {
-		drawLine(0, i, canvasWidth, i);
-	}
+	updateEmojiGrid();
 
 	function drawLine(x1, y1, x2, y2) {
 		ctx.beginPath();
-		ctx.moveTo(x1, y1);
-		ctx.lineTo(x2, y2);
+		ctx.moveTo(x1 + 0.5, y1 + 0.5);
+		ctx.lineTo(x2 + 0.5, y2 + 0.5);
 		ctx.stroke();
-		ctx.restore();
+	}
+
+	function fillSquare(x, y, width, height, color) {
+		ctx.strokeStyle = 'transparent';
+		ctx.fillStyle = color;
+		ctx.fillRect(x, y, width, height);
 	}
 }
 
-//generates the strings needed based off of the grid
-var discordString = '';
-var niceString = '';
-function generateEmojiString() {
-	niceString = '';
-	discordString = '';
+function updateEmojiGrid() {
+	$('#code').html(getEmojiString(true));
+}
+
+function updateUrl() {
+	// var url = '?data=';
+	// var obj = new Object();
+	// obj.version = 1;
+	// obj.data = grid;
+	// var str = JSON.stringify(obj);
+	// str = btoa(str);
+	// window.location.hash = str;
+	// console.log('Updating hash: ' + str);
+}
+
+function getEmojiString(newlines = false) {
+	var str = '';
 	for (var i = 0; i < grid[0].length; i++) {
 		for (var j = 0; j < grid[i].length; j++) {
-			discordString += grid[i][j];
-			niceString += grid[i][j];
+			var index = grid[i][j];
+			str += SQUARE_EMOJIS_ARRAY[index];
 		}
-		niceString += '\n';
+		if (newlines) {
+			str += '\n';
+		}
 	}
-
-	$('#code').html(niceString);
+	return str;
 }
 
 //draw the currently slected color
@@ -115,65 +111,73 @@ function drawCurrentColor() {
 	$('#selected').html(' ');
 	let div = '<div id="colorSelected"></div>';
 	$('#selected').append(div);
-	$('#colorSelected').css('background', squareColors[colorIndexWeAreDrawing]);
+	$('#colorSelected').css('background', SQUARE_COLORS_ARRAY[colorIndexWeAreDrawing]);
 }
 
 //draw the avaiable colors we can use
 function drawPalette() {
 	$('#palette').html(' ');
 
-	for (let i = 0; i < squareColors.length; i++) {
+	for (let i = 0; i < SQUARE_COLORS_ARRAY.length; i++) {
 		let div = '<div id="color' + i + '"></div>';
 		$('#palette').append(div);
-		$('#color' + i).css('background', squareColors[i]);
+		$('#color' + i).css('background', SQUARE_COLORS_ARRAY[i]);
 	}
 
 	//add the click events
 	$('#palette div').each(function(div) {
 		$(`#color${div}`).click(function() {
-			if (squareColors[div]) {
-				let color = squareColors[div];
+			if (SQUARE_COLORS_ARRAY[div]) {
+				let color = SQUARE_COLORS_ARRAY[div];
 				colorIndexWeAreDrawing = div;
 				drawCurrentColor();
 			}
 		});
 	});
 }
+
+//update the url on mouse up reguardless if they are off of the canvas or not
+document.documentElement.addEventListener('mouseup', function(e) {
+	updateUrl();
+});
+
 //when we click the canvas, try drawing a square
 canvas.onclick = function(event) {
-	drawSquare(event);
+	mouseDrawOnCanvas(event);
 };
 
 //when we move the mouse, try drawing a square
 $('canvas').on('mousemove', function(event) {
 	event.preventDefault();
 	if (event.buttons == 1 || event.buttons == 3) {
-		drawSquare(event);
+		mouseDrawOnCanvas(event);
 	}
 });
 
-//draw a square
-function drawSquare(event) {
+function gridCoordsFromCanvas(canvasX) {
+	return Math.floor((canvasX - CANVAS_GRID_LINE_WIDTH) / (CANVAS_SQUARE_SIZE + CANVAS_GRID_LINE_WIDTH));
+}
+
+function mouseDrawOnCanvas(event) {
 	let margin = canvas.getBoundingClientRect(); //This will calculate the margins for the canvas
 
 	let x = event.clientX - margin.left;
 	let y = event.clientY - margin.top;
 
-	let squareWidth = canvas.width / GRID_SIZE;
-	let squareHeight = canvas.height / GRID_SIZE;
+	let i = gridCoordsFromCanvas(y);
+	let j = gridCoordsFromCanvas(x);
 
-	let newSquare = new Square(x, y, squareHeight, squareWidth, squareColors[colorIndexWeAreDrawing]);
-	newSquare.draw();
-
-	//redraw the black lines
-	makeGrid(GRID_SIZE, GRID_SIZE);
+	if (i >= 0 && i < GRID_SIZE && j >= 0 && j < GRID_SIZE) {
+		grid[i][j] = colorIndexWeAreDrawing;
+		updateCanvasGrid();
+	}
 }
 
 //when the single line string button is clicked
 $('#copySingleString').click(function() {
 	var $temp = $('<textarea>');
 	$('body').append($temp);
-	$temp.val(discordString).select();
+	$temp.val(getEmojiString()).select();
 	document.execCommand('copy');
 	$temp.remove();
 });
@@ -182,7 +186,7 @@ $('#copySingleString').click(function() {
 $('#copyMultiLineString').click(function() {
 	var $temp = $('<textarea>');
 	$('body').append($temp);
-	$temp.val(niceString).select();
+	$temp.val(getEmojiString(true)).select();
 	document.execCommand('copy');
 	$temp.remove();
 });
@@ -202,7 +206,7 @@ $('#copyJavascript').click(function() {
 	var $temp = $('<input>');
 	$('body').append($temp);
 	var str = javascriptTemplate;
-	str = str.replace('%text%', discordString);
+	str = str.replace('%text%', getEmojiString());
 	$temp.val(str).select();
 	document.execCommand('copy');
 	$temp.remove();
