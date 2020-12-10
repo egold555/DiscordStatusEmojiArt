@@ -15,7 +15,7 @@ const MAX_COLORS = SQUARE_COLORS_ARRAY.length;
 const GRID_SIZE = 11;
 const CANVAS_SQUARE_SIZE = 36; //px
 const CANVAS_GRID_LINE_WIDTH = 1;
-const CURRENT_VERSION = 1;
+const CURRENT_VERSION = 2;
 
 //generate a 2d grid for storing emojis in
 var grid = new Array(GRID_SIZE);
@@ -86,7 +86,17 @@ function updateEmojiGrid() {
 function updateUrl() {
 	var obj = new Object();
 	obj.version = CURRENT_VERSION;
-	obj.data = grid;
+
+	var str = '';
+	for (var i = 0; i < GRID_SIZE; i++) {
+		for (var j = 0; j < GRID_SIZE; j++) {
+			str += grid[i][j];
+		}
+	}
+
+	console.log(str);
+
+	obj.data = str;
 	var str = JSON.stringify(obj);
 	str = btoa(str);
 	window.location.hash = str;
@@ -99,8 +109,9 @@ function decodeOnFirstLoad() {
 		try {
 			var decoded = atob(hash);
 			var obj = JSON.parse(decoded);
+			var version = obj.version;
 
-			if (obj.version == 1) {
+			if (version == 1) {
 				var data = obj.data;
 				if (Array.isArray(data)) {
 					if (data.length == GRID_SIZE) {
@@ -161,7 +172,26 @@ function decodeOnFirstLoad() {
 				//the data is right for version 1
 				grid = data;
 				updateCanvasGrid();
-				tata.success('Success!', 'Successfull loaded from the shared URL!');
+				tata.success('Success!', 'Successfull loaded from the shared URL! (v1)');
+			} else if (version == CURRENT_VERSION) {
+				var strData = obj.data;
+
+				var j = 0;
+				var i = 0;
+				for (var temp = 0; temp < strData.length; temp++) {
+					var character = strData[temp];
+					var int = parseInt(character);
+
+					if (i != 0 && i % 11 == 0) {
+						j++;
+						i = 0;
+					}
+					grid[j][i] = int;
+					console.log('i: ' + i + ' j: ' + j + ' char: ' + character + ' int: ' + int);
+					i++;
+				}
+				updateCanvasGrid();
+				tata.success('Success!', 'Successfull loaded from the shared URL! (v2)');
 			} else {
 				error('Failed to decode hash. Unknown version!');
 				return;
